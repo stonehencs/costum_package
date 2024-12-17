@@ -1,0 +1,5 @@
+config BR2_PACKAGE_HELLO
+    bool "hello"
+    help
+      Egy egyszerű Hello World alkalmazás C-ben.
+

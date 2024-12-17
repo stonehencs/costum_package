@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_APPS_PATH/package/myapp/Config.in"
+source "$BR2_EXTERNAL_APPS_PATH/package/hello/Config.in"
