@@ -1,0 +1,6 @@
+config BR2_PACKAGE_BENCE
+    bool "bence"
+    help
+      A 'bence' nevű csomag, amely két egyszerű C programot tartalmaz:
+      - Egy "Hello World!" üzenet kiírása.
+      - Egy karácsonyfa kirajzolása soros terminálra.
