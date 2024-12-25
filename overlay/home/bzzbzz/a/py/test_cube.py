@@ -4,11 +4,11 @@ import random
 import threading
 
 # GPIO beállítások
-CHIP_NAME = "gpiochip0"
-LATCH_PIN = 2
-BLANK_PIN = 4
-DATA_PIN = 11
-CLOCK_PIN = 13
+CHIP_NAME = "gpiochip2"
+LATCH_PIN = 10
+BLANK_PIN = 7
+DATA_PIN = 8
+CLOCK_PIN = 6
 
 # GPIO inicializáció
 def init_gpio():
