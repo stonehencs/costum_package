@@ -6,7 +6,7 @@ import threading
 # GPIO beállítások
 CHIP_NAME = "gpiochip2"
 LATCH_PIN = 10
-BLANK_PIN = 7
+BLANK_PIN = 9
 DATA_PIN = 8
 CLOCK_PIN = 6
 
