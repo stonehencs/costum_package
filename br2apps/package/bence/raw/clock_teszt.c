@@ -1,57 +1,79 @@
 #include <stdio.h>
-#include <gpiod.h>
-#include <unistd.h> // usleep függvényhez
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <stdint.h>
 
-#define HIGH 1
-#define LOW  0
+#define GPIO_BASE 0x1f207800 // GPIO alapcím (gpiochip2)
+#define BLOCK_SIZE 4096      // Memória blokkméret
+
+volatile uint32_t *gpio; // GPIO regiszter pointer
+
+// GPIO inicializáció (memória leképezése)
+void setup_gpio() {
+    int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
+    if (mem_fd < 0) {
+        perror("Nem sikerült megnyitni a /dev/mem fájlt");
+        exit(1);
+    }
+
+    gpio = (volatile uint32_t *)mmap(
+        NULL,
+        BLOCK_SIZE,
+        PROT_READ | PROT_WRITE,
+        MAP_SHARED,
+        mem_fd,
+        GPIO_BASE
+    );
+
+    if (gpio == MAP_FAILED) {
+        perror("Nem sikerült leképezni a GPIO memóriát");
+        close(mem_fd);
+        exit(1);
+    }
+
+    close(mem_fd);
+}
+
+// GPIO láb kimeneti módra állítása
+void set_gpio_output(int line) {
+    int reg_index = line / 10;       // GPFSEL regiszter kiválasztása
+    int bit_offset = (line % 10) * 3; // Pinhez tartozó bitek
+
+    gpio[reg_index] &= ~(7 << bit_offset); // Bitek törlése
+    gpio[reg_index] |= (1 << bit_offset);  // Kimeneti mód beállítása
+}
+
+// GPIO láb értékének beállítása (HIGH vagy LOW)
+void write_gpio(int line, int value) {
+    int reg_index = (value ? 7 : 10); // GPSET vagy GPCLR regiszter
+    gpio[reg_index] = (1 << line);    // Pin beállítása
+}
+
+// Gyors clock jel generálása
+void generate_clock(int line, int cycles) {
+    for (int i = 0; i < cycles; i++) {
+        write_gpio(line, 1); // HIGH
+        write_gpio(line, 0); // LOW
+    }
+}
 
 int main() {
-    char chip_name[32];
-    int pin;
-    unsigned int delay_us;
+    int clock_line = 10; // GPIO chip 2, line 10
+    int cycles = 1000000; // A clock ciklusainak száma
 
-    printf("Adja meg a GPIO chip nevét (pl. gpiochip0): ");
-    scanf("%31s", chip_name);
+    // GPIO inicializálása
+    setup_gpio();
 
-    printf("Adja meg a GPIO pin számát: ");
-    scanf("%d", &pin);
+    // GPIO láb kimeneti módra állítása
+    set_gpio_output(clock_line);
 
-    printf("Adja meg a blinkelés késleltetését (μs): ");
-    scanf("%u", &delay_us);
+    // Clock jel generálása
+    generate_clock(clock_line, cycles);
 
-    // GPIO chip inicializálása
-    struct gpiod_chip *chip = gpiod_chip_open_by_name(chip_name);
-    if (!chip) {
-        perror("Nem sikerült megnyitni a GPIO chipet");
-        return 1;
-    }
+    printf("Clock jel generálása befejeződött.\n");
 
-    // GPIO pin elérése
-    struct gpiod_line *line = gpiod_chip_get_line(chip, pin);
-    if (!line) {
-        perror("Nem sikerült elérni a GPIO pint");
-        gpiod_chip_close(chip);
-        return 1;
-    }
-
-    // GPIO pin kimeneti módra állítása
-    if (gpiod_line_request_output(line, "blink", LOW) < 0) {
-        perror("Nem sikerült kimeneti módra állítani a pint");
-        gpiod_chip_close(chip);
-        return 1;
-    }
-
-    printf("Blinkelés elkezdődik. Nyomjon Ctrl+C-t a leállításhoz.\n");
-
-    // Végtelen ciklus blinkeléshez
-    while (1) {
-        gpiod_line_set_value(line, HIGH);
-        gpiod_line_set_value(line, LOW);
-
-    }
-
-    // GPIO felszabadítása (ez a kód nem éri el a while végtelensége miatt)
-    gpiod_chip_close(chip);
     return 0;
 }
 
