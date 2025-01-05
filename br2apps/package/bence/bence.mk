@@ -1,4 +1,4 @@
-BENCE_VERSION = 2.1
+BENCE_VERSION = 2.3
 BENCE_SOURCE = 
 BENCE_LICENSE = MIT
 BENCE_LICENSE_FILES =
@@ -10,7 +10,13 @@ define BENCE_BUILD_CMDS
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/christmastree $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/christmastree.c
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/tog_gpio $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/tog_gpio.c -lgpiod
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/shift_gpio $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/shift.c -lgpiod
+    $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/teszt_cube $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/teszt_cube.c -lgpiod
     cp -r $(MY_OVERLAY_FILES)/* $(TARGET_DIR)/
+endef
+define BENCE_INSTALL_TARGET_CMDS
+    @echo "Installing overlay files..."
+    cp -r $(MY_OVERLAY_FILES)/* $(TARGET_DIR)/
+    @echo "Overlay files installed successfully!"
 endef
 
 $(eval $(generic-package))

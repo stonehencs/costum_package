@@ -43,8 +43,7 @@ def multiplex_bam(latch_line, blank_line, data_line, clock_line, red, green, blu
     anode = [0b00000001 << i for i in range(8)]  # 8 szint
 
     while True:
-        # Kikapcsolás
-        blank_line.set_value(1)
+        blank_line.set_value(1)  # Kikapcsolás
         
         # BAM bit kezelés
         if bam_counter == 8:
@@ -59,10 +58,18 @@ def multiplex_bam(latch_line, blank_line, data_line, clock_line, red, green, blu
         bam_counter += 1
 
         # Színek küldése SPI-n keresztül
-        for i in range(8):
-            shift_out(red[bam_bit][i], data_line, clock_line)  # Piros
-            shift_out(green[bam_bit][i], data_line, clock_line)  # Zöld
-            shift_out(blue[bam_bit][i], data_line, clock_line)  # Kék
+        for row in range(8):
+            row_data_red = 0
+            row_data_green = 0
+            row_data_blue = 0
+            for column in range(8):
+                row_data_red |= red[bam_bit][row][column] << column
+                row_data_green |= green[bam_bit][row][column] << column
+                row_data_blue |= blue[bam_bit][row][column] << column
+
+            shift_out(row_data_red, data_line, clock_line)  # Piros
+            shift_out(row_data_green, data_line, clock_line)  # Zöld
+            shift_out(row_data_blue, data_line, clock_line)  # Kék
 
         # Anód frissítés
         shift_out(anode[bam_counter % 8], data_line, clock_line)
@@ -74,14 +81,17 @@ def multiplex_bam(latch_line, blank_line, data_line, clock_line, red, green, blu
 
 # LED-ek adatstruktúrája
 def initialize_led_array():
-    return [[[0] * 8 for _ in range(8)] for _ in range(4)]  # 4 BAM szint, 8x8 mátrix
+    """LED mátrix inicializálása 4 BAM szinttel és 8x8 mátrixokkal."""
+    return [[[0 for _ in range(8)] for _ in range(8)] for _ in range(4)]  # 4 BAM szint, 8x8 mátrix
 
 # LED állítás
 def set_led(red, green, blue, level, row, column, r, g, b):
-    for bit in range(4):  # BAM szintek
-        red[bit][row][column] = (r >> bit) & 1
-        green[bit][row][column] = (g >> bit) & 1
-        blue[bit][row][column] = (b >> bit) & 1
+    """Egy LED beállítása adott szinten, sorban, oszlopban és színekkel."""
+    if 0 <= level < 8 and 0 <= row < 8 and 0 <= column < 8:
+        for bit in range(4):  # BAM szintek
+            red[bit][row][column] = (r >> bit) & 1
+            green[bit][row][column] = (g >> bit) & 1
+            blue[bit][row][column] = (b >> bit) & 1
 
 # Animációs funkciók
 def rain_animation(red, green, blue):
@@ -170,7 +180,7 @@ if __name__ == "__main__":
             sinewave_animation,
             color_wheel_animation,
             bouncy_ball_animation,
-            wipe_out_animation,  # ÚJ wipe out animáció
+            wipe_out_animation,
         ]
         for animation in animations:
             animation(red, green, blue)
@@ -184,4 +194,3 @@ if __name__ == "__main__":
         data_line.release()
         clock_line.release()
         print("GPIO vonalak felszabadítva.")
-
