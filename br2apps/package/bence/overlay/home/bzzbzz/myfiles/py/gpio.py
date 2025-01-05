@@ -27,14 +27,9 @@ def main():
         return
 
     try:
-        # Pin magas szintre állítása
-        print("Pin HIGH állapotba állítása")
-        line.set_value(1)
-        time.sleep(2)  # 2 másodperc várakozás
-
-        # Pin alacsony szintre állítása
-        print("Pin LOW állapotba állítása")
-        line.set_value(0)
+        while true:
+	        line.set_value(1)
+	        line.set_value(0)
     except OSError as e:
         print(f"Hiba történt a GPIO állapotának beállításakor: {e}")
     finally:
