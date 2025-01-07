@@ -12,6 +12,7 @@ define BENCE_BUILD_CMDS
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/shift_gpio $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/shift.c -lgpiod
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/teszt_cube $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/teszt_cube.c -lgpiod
     $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/clock_teszt $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/clock_teszt.c -lgpiod
+    $(TARGET_CC) $(TARGET_CFLAGS) -o $(TARGET_DIR)/usr/bin/gpio_teszt $(BR2_EXTERNAL_APPS_PATH)/package/bence/raw/gpio_teszt.c
     cp -r $(MY_OVERLAY_FILES)/* $(TARGET_DIR)/
 endef
 define BENCE_INSTALL_TARGET_CMDS
